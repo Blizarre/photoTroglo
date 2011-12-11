@@ -14,15 +14,15 @@ def encode_multipart_formdata(fields, files):
     L = []
     for (key, value) in fields.items():
         L.append('--' + BOUNDARY)
-        L.append('Content-Disposition: form-data; name="%s"' % key)
+        L.append('Content-Disposition: form-data; name="%s"' % str(key))
         L.append('')
-        L.append(value)
+        L.append(str(value))
     for (key, filename, value) in files:
         L.append('--' + BOUNDARY)
-        L.append('Content-Disposition: form-data; name="%s"; filename="%s"' % (key, filename))
-        L.append('Content-Type: %s' % get_content_type(filename))
+        L.append('Content-Disposition: form-data; name="%s"; filename="%s"' % (str(key), str(filename)))
+        L.append('Content-Type: %s' % get_content_type(str(filename)))
         L.append('')
-        L.append(value)
+        L.append(str(value))
     L.append('--' + BOUNDARY + '--')
     L.append('')
     body = CRLF.join(L)

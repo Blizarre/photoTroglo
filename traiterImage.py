@@ -4,6 +4,7 @@ from PIL import Image
 
 import logging as log
 
+# Liste des qualité d'images
 d_qualite = {
     0:(800, 50),
     1:(1024, 50),
@@ -15,6 +16,7 @@ def traiter(cheminImageIn, cheminImageOut, qualite):
     o_X, o_Y = im.size
     t_X, qualJPG = d_qualite[qualite]
     
+    # On cherche juste la nouvelle taille (sans augmenter la taille)
     if t_X > o_X:
         t_X, t_Y = (o_X, o_Y)
     else:

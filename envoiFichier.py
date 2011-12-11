@@ -4,6 +4,7 @@
 import httplib as http
 import urlparse as urlp
 import os.path as op
+import pdb
 
 import logging as log
 from postUsingMIME import encode_multipart_formdata as encodeMulti
@@ -19,6 +20,7 @@ class EnvoiFichiers:
         self.cheminServeur = data_url.path
     
     def _preparerRequete(self, cheminFichier, collection, nomFichier):
+        log.debug("Preparation de la requete: %s, %s, %s", cheminFichier, collection, nomFichier)
         if not nomFichier:
             nomFichier = op.split(cheminFichier)[-1]
         if not collection:
@@ -29,6 +31,7 @@ class EnvoiFichiers:
             dataFichier = fd.read()
         log.debug("Taille du fichier %s : %d", cheminFichier, len(dataFichier))
 
+        log.debug("Header -> collection: %s, nomFichier: %s", collection, nomFichier)
         header = {"collection":collection, "nomFichier":nomFichier}
         content_type, body = encodeMulti(header, [["imageEnvoyee", nomFichier, dataFichier]] )
     

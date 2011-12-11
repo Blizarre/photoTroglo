@@ -14,9 +14,10 @@ import traiterImage as tm
 from envoiFichier import EnvoiFichiers
 
 import tempfile
+import traceback
 
 def cleanup(nom):
-        nvNom = re.sub("[^\._a-zA-Z0-9]", '', nom)
+        nvNom = re.sub("[^\._\-a-zA-Z0-9]", '', nom)
         print nvNom
         return nvNom
 
@@ -45,16 +46,17 @@ class Application(Frame):
                     self.master.update_idletasks()
                     
                     fd,fichierTemp = tempfile.mkstemp(suffix=".jpg")
-                    os.close(fd)
+                    os.close(fd) # Pas besoin de ce fichier ouvert, juste le nom
                     tm.traiter(join(self.nomRep, nomFichier), fichierTemp, self.scale.get())
-                    connEnv.envoyerFichier(fichierTemp, str(self.nomCollec.get()), str(nomFichier))
+                    connEnv.envoyerFichier(fichierTemp, cleanup(self.nomCollec.get()), cleanup(nomFichier))
                     self.liste.delete(0)
                     self.master.update_idletasks()
                     
                 self.labelRep["text"] = "Envoi des fichiers terminé"
                 tkMessageBox.showinfo("Bonne nouvelle !", "Envoi des fichiers terminé !")
             except Exception as e:
-                    tkMessageBox.showerror("Petit problème", "Il y a eu un problème lors de l'envoi de l'image. Plus d'explications ci-après (bon courage) :\n>>> " + str(e))
+                    tkMessageBox.showinfo("Petit problème", "Il y a eu un problème lors de l'envoi de l'image. Plus d'explications ci-après (bon courage) :\n>>> " + str(e)+ "\n")
+                    traceback.print_exc()
                 
         
         
