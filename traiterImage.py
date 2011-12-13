@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-from PIL import Image
+import Image
 
 import logging as log
 

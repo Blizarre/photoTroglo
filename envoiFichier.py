@@ -4,12 +4,22 @@
 import httplib as http
 import urlparse as urlp
 import os.path as op
-import pdb
+
 
 import logging as log
 from postUsingMIME import encode_multipart_formdata as encodeMulti
 
+import urllib as ur
 log.basicConfig(level=log.DEBUG)
+
+def genererGalerie(url, nomCollection):
+    
+    log.debug("Lancement de 'GenererGalerie' avec l'url %s", url)
+    result = ur.urlopen(url + "?" + ur.urlencode({"collection":nomCollection}))
+    log.debug("Retour de la création de la galerie :\n" + result.read())
+    
+
+
 
 class EnvoiFichiers:
     
@@ -53,7 +63,7 @@ class EnvoiFichiers:
         log.debug("Taille des données envoyées : %s octets", len(body))
         connexion.send(body)
         
-        reponse = connexion.getresponse()
+        reponse = connexion.getresponse().read()
         connexion.close()
         
         return reponse
