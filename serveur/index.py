@@ -1,6 +1,14 @@
+#!/usr/bin/python
+# encoding: utf-8
 
 import os.path as op
 import os
+
+import cgitb
+cgitb.enable()
+
+import cgi
+
 
 print "Content-type: text/html; charset=utf-8\n\n"
 print """<html>
@@ -14,7 +22,7 @@ print """<html>
 print "<ul>"
 for d in os.listdir("."):
 	if op.isdir(d):
-		print "<li><a href='%s'>%s</a></li>\n"%(d,d,)
+		print "<li><a href='%s'>%s</a></li>\n"%(d,d)
 
 print "</ul></body></html>" 
 	
