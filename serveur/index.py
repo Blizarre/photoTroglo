@@ -7,8 +7,6 @@ import os
 import cgitb
 cgitb.enable()
 
-import cgi
-
 
 print "Content-type: text/html; charset=utf-8\n\n"
 print """<html>

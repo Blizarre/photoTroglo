@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-VERSION="1.2"
+VERSION="1.3"
 
 from Tkinter import *
 import tkFileDialog, tkMessageBox
@@ -55,16 +55,34 @@ class Application(Frame):
 				nomFichier = self.liste.get(0)
 				self.changerStatus(u"Envoi de %s en cours..."%(nomFichier))
 				fd,fichierTemp = tempfile.mkstemp(suffix=".jpg")
+				fdT,fichierTempT = tempfile.mkstemp(suffix=".jpg")
+				fdG,fichierTempG = tempfile.mkstemp(suffix=".jpg")
 				close(fd) # Pas besoin de ce fichier ouvert, juste le nom
+				close(fdT) # Pas besoin de ce fichier ouvert, juste le nom
+				close(fdG) # Pas besoin de ce fichier ouvert, juste le nom
 				
 				# Changement de taille des images (dans un fichier temporaire)
 				tm.traiter(join(self.nomRep, nomFichier), fichierTemp, self.scale.get())
+				tm.traiter(join(self.nomRep, nomFichier), fichierTempT, -1) # create thumbnail
+				tm.traiter(join(self.nomRep, nomFichier), fichierTempG, 0) # create thumbnail
 				self.master.update()
 				
 				# Envoi de ce fichier temporaire
 				reponse = connEnv.envoyerFichier(fichierTemp, nomCollection, cleanup(nomFichier))
 				log.debug("Réponse de l'upload de %s : \n%s", nomFichier, reponse) 
+				if reponse[:2] != "OK": raise Exception("Erreur lors de l'envoi du fichier main " + nomFichier)
+
+				reponse = connEnv.envoyerFichierThumb(fichierTempT, nomCollection, cleanup(nomFichier))
+				log.debug("Réponse de l'upload de %s : \n%s", nomFichier, reponse) 
+				if reponse[:2] != "OK": raise Exception("Erreur lors de l'envoi du fichier thumb " + nomFichier)
+				
+				reponse = connEnv.envoyerFichierGal(fichierTempG, nomCollection, cleanup(nomFichier))
+				log.debug("Réponse de l'upload de %s : \n%s", nomFichier, reponse) 
+				if reponse[:2] != "OK": raise Exception("Erreur lors de l'envoi du fichier Gal " + nomFichier)
+
 				unlink(fichierTemp) # fichier temporaire devenu inutile
+				unlink(fichierTempT) # fichier temporaire devenu inutile
+				unlink(fichierTempG) # fichier temporaire devenu inutile
 				self.liste.delete(0)
 				self.master.update()
 			except Exception as e:
@@ -72,8 +90,9 @@ class Application(Frame):
 				log.warn("Erreur lors de l'envoie du fichier ! : %s", str(e))
 				if nombreErreurs > 5:
 					tkMessageBox.showinfo("Petit problème", "Il y a eu un problème lors de l'envoi de l'image. Plus d'explications ci-après (bon courage) :\n>>> " + str(e)+ "\n")
-					self.quit()
+					return False
 		self.changerStatus(u"Envoi des fichiers terminé")
+		return True
 
 
 	def _creerGalerie(self):
@@ -113,8 +132,8 @@ class Application(Frame):
 						"spéciaux type éàçùµ£$ qui ne sont pas autorisés" 
 						)			
 		else:
-			self._contacterUpload()
-			self._creerGalerie()					
+			if self._contacterUpload():
+				self._creerGalerie()					
 					
 		self.btEnvoiFichiers["state"] = NORMAL
 		
@@ -155,7 +174,7 @@ class Application(Frame):
 		self.scale = Scale(self.frameBoutons, from_=0, to=3, orient=HORIZONTAL)
 		self.scale.set(2)
 		self.scale.pack({"side": "top"}, fill=X)
- 
+
 		self.btEnvoiFichiers = Button(self.frameBoutons)
 		self.btEnvoiFichiers["text"] = "4) Envoyer les fichiers"
 		self.btEnvoiFichiers["command"] = self.envoyerFichiers

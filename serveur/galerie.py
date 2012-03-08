@@ -67,7 +67,7 @@ DEFAULT_INDEX = """
 """
 
 XML_BEGIN = """<?xml version="1.0" encoding="UTF-8"?>
-<simpleviewerGallery maxImageWidth="1024" maxImageHeight="1024" textColor="0xFFFFFF" frameColor="0xFFFFFF" frameWidth="5" stagePadding="10" thumbnailColumns="3" thumbnailRows="5" navPosition="left" title="%s" enableRightClickOpen="true" backgroundImagePath="" imagePath="images/" thumbPath="thumb/">"""
+<simpleviewerGallery maxImageWidth="1024" maxImageHeight="1024" textColor="0xFFFFFF" frameColor="0xFFFFFF" frameWidth="5" stagePadding="10" thumbnailColumns="3" thumbnailRows="5" navPosition="left" title="%s" enableRightClickOpen="true" backgroundImagePath="" imagePath="images/" thumbPath="thumbs/">"""
 XML_PART  = """
 	<image>
 		<filename>%s</filename>
