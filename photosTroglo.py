@@ -25,11 +25,29 @@ def cleanup(nom):
 		return nvNom
 
 
-URL_BASE = "http://www.marache.net/envoiPhotos/"
+URL_BASE = "http://photo.troglos.fr/"
 URL_UPLOAD = URL_BASE + "upload.cgi"
 URL_CREERGALERIE = URL_BASE + "galerie.cgi"
 
+class NomFichier:
+	def __init__(self, _t):
+		self.texte = _t
+		self.commentaire = ""
+	
+	def __str__(self):
+		return self.texte
+
+
+
+
 class Application(Frame):
+
+	def OnSelectListElement(self, event):
+		app.entreeCommentaire["state"] = NORMAL
+		app.nomCommentaire.set(self.liste.get(self.liste.curselection()).commentaire)
+
+	
+		
 	def DemanderRep(self):
 		self.nomRep = tkFileDialog.askdirectory()
 		
@@ -41,7 +59,7 @@ class Application(Frame):
 			for f in listdir(self.nomRep):
 				ext = splitext(f)[-1]
 				if ext.lower() in (".jpg", ".jpeg"):	
-					self.liste.insert(END, f)
+					self.liste.insert(END, NomFichier(f))
 
 	def changerStatus(self, nvStatus):
 		self.labelRep["text"] = nvStatus
@@ -85,7 +103,7 @@ class Application(Frame):
 				unlink(fichierTempG) # fichier temporaire devenu inutile
 				self.liste.delete(0)
 				self.master.update()
-			except Exception as e:
+			except Exception, e:
 				nombreErreurs += 1
 				log.warn("Erreur lors de l'envoie du fichier ! : %s", str(e))
 				if nombreErreurs > 5:
@@ -95,6 +113,7 @@ class Application(Frame):
 		return True
 
 
+		
 	def _creerGalerie(self):
 		nomCollection = cleanup(self.nomCollec.get())
 		galerieOk = False
@@ -103,7 +122,7 @@ class Application(Frame):
 			try:
 				genererGalerie(URL_CREERGALERIE, nomCollection)
 				galerieOk = True
-			except Exception as e:
+			except Exception, e:
 				nombreErreurs += 1
 				log.warn("Erreur lors de la création de la galerie ! : %s", str(e))
 				if nombreErreurs > 5:
@@ -137,14 +156,38 @@ class Application(Frame):
 					
 		self.btEnvoiFichiers["state"] = NORMAL
 		
-		
+
+
 		
 	def createWidgets(self):
+		### Frame des boutons placé à gauche
 		
 		self.frameBoutons = Frame(self)
 		self.frameBoutons.pack({"side": "left"}, fill=Y, expand=NO)
-		
 
+		### Commentaire (en bas)
+
+		self.nomCommentaire = StringVar(self)
+		self.nomCommentaire.set("<Commentaire de l'image (Optionnel)>")
+		self.entreeCommentaire = Entry(self, textvariable=self.nomCommentaire,width=30)
+		self.entreeCommentaire.pack({"side": "bottom"}, fill=X)
+		self.entreeCommentaire["state"] = DISABLED
+		
+		### Label indiquant le répertoire (Haut)
+		
+		self.labelRep = Label(self)
+		self.labelRep["text"] = u"<Pas de répertoire sélectionné>"
+		self.labelRep.pack({"side": "top"})
+
+		### Liste des fichiers (Centre)
+		
+		self.liste = Listbox(self)
+		self.liste.pack({"side": "top"}, fill=BOTH, expand=YES)		
+		self.liste.bind('<Double-1>',self.OnSelectListElement)
+		#wx.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnSelectListElement, self.liste)
+		
+		### Boutons
+		
 		self.choixRep = Button(self.frameBoutons)
 		self.choixRep["text"] = "1) Choisir un repertoire"
 		self.choixRep["command"] = self.DemanderRep
@@ -153,14 +196,7 @@ class Application(Frame):
 		self.labelExpl = Label(self.frameBoutons)
 		self.labelExpl["text"] = "2) Nom de la collection"
 		self.labelExpl.pack({"side": "top"}, fill=X)
-
-		self.labelRep = Label(self)
-		self.labelRep["text"] = u"<Pas de répertoire sélectionné>"
-		self.labelRep.pack({"side": "top"})
-
-		self.liste = Listbox(self)
-		self.liste.pack({"side": "top"}, fill=BOTH, expand=YES)		
-
+		
 		self.nomCollec = StringVar(self)
 		self.nomCollec.set("<Nom de la collection>")
 		self.entreeNomCollec = Entry(self.frameBoutons, textvariable=self.nomCollec,width=30)
@@ -179,7 +215,7 @@ class Application(Frame):
 		self.btEnvoiFichiers["text"] = "4) Envoyer les fichiers"
 		self.btEnvoiFichiers["command"] = self.envoyerFichiers
 		self.btEnvoiFichiers.pack({"side": "top"}, fill=X, pady=40)
-
+		
 		self.QUIT = Button(self.frameBoutons)
 		self.QUIT["text"] = "Quitter"
 		self.QUIT["command"] =  self.quit

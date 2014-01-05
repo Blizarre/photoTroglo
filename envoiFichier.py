@@ -40,8 +40,8 @@ class EnvoiFichiers:
 			chemin = op.split(cheminFichier)[0]
 			collection = op.split(chemin)[-1]
 				
-		with open(cheminFichier, "rb") as fd:
-			dataFichier = fd.read()
+		fd = open(cheminFichier, "rb")
+		dataFichier = fd.read()
 		log.debug("Taille du fichier %s : %d", cheminFichier, len(dataFichier))
 
 		log.debug("Header -> collection: %s, nomFichier: %s", collection, nomFichier)
