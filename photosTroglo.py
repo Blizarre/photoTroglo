@@ -8,6 +8,7 @@ import webbrowser
 from os import listdir, close, unlink
 from os.path import join, split, splitext
 from tkinter import *
+from tkinter.ttk import *
 from tkinter import filedialog, messagebox
 
 import traiterImage as tm
@@ -157,7 +158,7 @@ class Application(Frame):
     def createWidgets(self):
         ### Frame des boutons placé à gauche
 
-        self.frameBoutons = Frame(self)
+        self.frameBoutons = Frame(self, pad=10)
         self.frameBoutons.pack({"side": "left"}, fill=Y, expand=NO)
 
         ### Commentaire (en bas)
@@ -217,13 +218,13 @@ class Application(Frame):
         self.QUIT.pack({"side": "top"})
 
     def __init__(self, master=None):
-        Frame.__init__(self, master)
+        Frame.__init__(self, master, pad=5)
         self.pack(fill=BOTH, expand=YES)
         self.createWidgets()
 
 
 root = Tk()
-root.geometry("650x384")
+root.geometry("650x400")
 root.title("Envoi de photos v" + VERSION)
 app = Application(master=root)
 app.mainloop()
