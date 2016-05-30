@@ -134,13 +134,17 @@ try:
 			zipColl = zipfile.ZipFile(op.join(collection,"archive.zip"), "w")
 	
 			listeFichiers = listerFichierCollection(collection)
+			listeFichiers.sort()
+
 			listeDesImages = []
 			for nomFichier in listeFichiers:
 				cheminFichier = op.join(collection,nomFichier)
 				if isImage(cheminFichier):
 					listeDesImages.append(nomFichier)
 					zipColl.write(cheminFichier)
+					os.remove(cheminFichier)
 			zipColl.close()
+			status += "Ajout de " + str(len(listeDesImages)) + " images."
 			creerIndex(collection, len(listeDesImages))
 			creerGalerie(collection, listeDesImages)
 				
