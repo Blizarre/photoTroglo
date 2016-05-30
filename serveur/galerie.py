@@ -8,8 +8,8 @@ import os
 import shutil
 
 import cgitb
-cgitb.enable()
 
+cgitb.enable()
 
 DEFAULT_INDEX = """
 <html xml:lang="fr" lang="fr">
@@ -68,55 +68,58 @@ DEFAULT_INDEX = """
 
 XML_BEGIN = """<?xml version="1.0" encoding="UTF-8"?>
 <simpleviewerGallery maxImageWidth="1024" maxImageHeight="1024" textColor="0xFFFFFF" frameColor="0xFFFFFF" frameWidth="5" stagePadding="10" thumbnailColumns="3" thumbnailRows="5" navPosition="left" title="%s" enableRightClickOpen="true" backgroundImagePath="" imagePath="images/" thumbPath="thumbs/">"""
-XML_PART  = """
+XML_PART = """
 	<image>
 		<filename>%s</filename>
 		<caption></caption>
 	</image>"""
-XML_END   = """
+XML_END = """
 </simpleviewerGallery>"""
 
+
 def cleanup(nom):
-	"""Nettoyage du nom : On ne conserve que :
-	 - les lettres (majuscule/minuscule)
-	 - les chiffres
-	 - Les caractères ".", "-", et "_"
-	 """ 
-	return re.sub("[^\.\-_a-zA-Z0-9]", '', nom)
+    """Nettoyage du nom : On ne conserve que :
+     - les lettres (majuscule/minuscule)
+     - les chiffres
+     - Les caractères ".", "-", et "_"
+     """
+    return re.sub("[^\.\-_a-zA-Z0-9]", '', nom)
+
 
 def isImage(cheminFichier):
-	"""Vérifie que le fichier existe et a une extension correspondant à une image"""
-	if op.isfile(cheminFichier):
-		_, ext = op.splitext(cheminFichier)
-		if ext.lower() in [".jpg", ".jpeg", ".png"]:
-			return True
-	return False
+    """Vérifie que le fichier existe et a une extension correspondant à une image"""
+    if op.isfile(cheminFichier):
+        _, ext = op.splitext(cheminFichier)
+        if ext.lower() in [".jpg", ".jpeg", ".png"]:
+            return True
+    return False
 
 
 def creerGalerie(collection, listeImages):
-	"""Crée le fichier "galerie.xml" contenant les paramètres de la galerie"""
-	fd = open(op.join(collection, "galerie.xml"), "w")
-	fd.write(XML_BEGIN%(collection,))
-	for nomIm in listeImages:
-		fd.write(XML_PART%(nomIm,))
-	fd.write(XML_END)
-	fd.close()
-	
-	shutil.copy("swfobject.js", collection)
-	shutil.copy("viewer.swf", collection)
-	
-	
+    """Crée le fichier "galerie.xml" contenant les paramètres de la galerie"""
+    fd = open(op.join(collection, "galerie.xml"), "w")
+    fd.write(XML_BEGIN % (collection,))
+    for nomIm in listeImages:
+        fd.write(XML_PART % (nomIm,))
+    fd.write(XML_END)
+    fd.close()
+
+    shutil.copy("swfobject.js", collection)
+    shutil.copy("viewer.swf", collection)
+
+
 def creerIndex(collection, nbImages):
-	"""Crée le fichier index.html"""
-	fd = open(op.join(collection,"index.html"), "w")
-	fd.write(DEFAULT_INDEX%(collection, nbImages))
-	fd.close()
+    """Crée le fichier index.html"""
+    fd = open(op.join(collection, "index.html"), "w")
+    fd.write(DEFAULT_INDEX % (collection, nbImages))
+    fd.close()
 
 
 def listerFichierCollection(collection):
-	"""Renvoie un tuple contenant tous les fichiers de la collection"""
-	listeF = os.listdir(collection)	
-	return listeF
+    """Renvoie un tuple contenant tous les fichiers de la collection"""
+    listeF = os.listdir(collection)
+    return listeF
+
 
 #########################
 ##### Démarrage du script
@@ -125,33 +128,33 @@ def listerFichierCollection(collection):
 status = "Démarrage" + "\n"
 
 try:
-	form = cgi.FieldStorage()
-	if "collection" in form:
-		collection  = cleanup(form["collection"].value)
-		if not os.path.isdir(collection):
-			status += "Erreur critique, collection inexistante"
-		else:
-			zipColl = zipfile.ZipFile(op.join(collection,"archive.zip"), "w")
-	
-			listeFichiers = listerFichierCollection(collection)
-			listeFichiers.sort()
+    form = cgi.FieldStorage()
+    if "collection" in form:
+        collection = cleanup(form["collection"].value)
+        if not os.path.isdir(collection):
+            status += "Erreur critique, collection inexistante"
+        else:
+            zipColl = zipfile.ZipFile(op.join(collection, "archive.zip"), "w")
 
-			listeDesImages = []
-			for nomFichier in listeFichiers:
-				cheminFichier = op.join(collection,nomFichier)
-				if isImage(cheminFichier):
-					listeDesImages.append(nomFichier)
-					zipColl.write(cheminFichier)
-					os.remove(cheminFichier)
-			zipColl.close()
-			status += "Ajout de " + str(len(listeDesImages)) + " images."
-			creerIndex(collection, len(listeDesImages))
-			creerGalerie(collection, listeDesImages)
-				
-		status += "Terminé"
-	else:
-		status += "Pas d'arguments trouvée"
+            listeFichiers = listerFichierCollection(collection)
+            listeFichiers.sort()
+
+            listeDesImages = []
+            for nomFichier in listeFichiers:
+                cheminFichier = op.join(collection, nomFichier)
+                if isImage(cheminFichier):
+                    listeDesImages.append(nomFichier)
+                    zipColl.write(cheminFichier)
+                    os.remove(cheminFichier)
+            zipColl.close()
+            status += "Ajout de " + str(len(listeDesImages)) + " images."
+            creerIndex(collection, len(listeDesImages))
+            creerGalerie(collection, listeDesImages)
+
+        status += "Terminé"
+    else:
+        status += "Pas d'arguments trouvée"
 except Exception, e:
-	status += "Erreur :" + str(e)
-	
+    status += "Erreur :" + str(e)
+
 print "Content-type: text/html; charset=utf-8\n\n" + status
