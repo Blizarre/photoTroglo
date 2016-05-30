@@ -2,21 +2,17 @@
 
 VERSION = "1.5"
 
+import logging as log
+import tempfile
+import webbrowser
+from os import listdir, close, unlink
+from os.path import join, split, splitext
 from tkinter import *
 from tkinter import filedialog, messagebox
 
-from os.path import join, split, splitext
-from os import listdir, close, unlink
-import re
 import traiterImage as tm
-
 from envoiFichier import EnvoiFichiers
 from envoiFichier import genererGalerie
-import tempfile
-
-import webbrowser
-
-import logging as log
 
 log.basicConfig(level=log.DEBUG)
 
@@ -85,7 +81,8 @@ class Application(Frame):
                 # Envoi de ce fichier temporaire
                 reponse = connEnv.envoyerFichier(fichierTemp, nomCollection, cleanup(nomFichier))
                 log.debug("Réponse de l'upload de %s : \n%s", nomFichier, reponse)
-                if reponse[:2] != b"OK": raise Exception("Erreur lors de l'envoi du fichier main " + nomFichier + " " + str(reponse))
+                if reponse[:2] != b"OK": raise Exception(
+                    "Erreur lors de l'envoi du fichier main " + nomFichier + " " + str(reponse))
 
                 reponse = connEnv.envoyerFichierThumb(fichierTempT, nomCollection, cleanup(nomFichier))
                 log.debug("Réponse de l'upload de %s : \n%s", nomFichier, reponse)
@@ -106,8 +103,8 @@ class Application(Frame):
                 log.warning("Erreur lors de l'envoie du fichier ! : %s", str(e))
                 if nombreErreurs > 5:
                     messagebox.showinfo("Petit problème",
-                                          "Il y a eu un problème lors de l'envoi de l'image. Plus d'explications ci-après (bon courage) :\n>>> " + str(
-                                              e) + "\n")
+                                        "Il y a eu un problème lors de l'envoi de l'image. Plus d'explications ci-après (bon courage) :\n>>> " + str(
+                                            e) + "\n")
                     return False
         self.changerStatus(u"Envoi des fichiers terminé")
         return True
@@ -126,13 +123,13 @@ class Application(Frame):
                 log.warning("Erreur lors de la création de la galerie ! : %s", str(e))
                 if nombreErreurs > 5:
                     messagebox.showinfo("Petit problème",
-                                          "Il y a eu un problème lors de l'envoi de l'image. Plus d'explications ci-après (bon courage) :\n>>> " + str(
-                                              e) + "\n")
+                                        "Il y a eu un problème lors de l'envoi de l'image. Plus d'explications ci-après (bon courage) :\n>>> " + str(
+                                            e) + "\n")
                     self.quit()
 
         self.changerStatus("La galerie a été crée sur le serveur")
         messagebox.showinfo(u"Bonne nouvelle !",
-                              u"Images disponibles à l'adresse : " + URL_BASE + nomCollection + u"\nUn navigateur va s'ouvrir à cette page")
+                            u"Images disponibles à l'adresse : " + URL_BASE + nomCollection + u"\nUn navigateur va s'ouvrir à cette page")
         webbrowser.open(URL_BASE + nomCollection)
 
     def envoyerFichiers(self):
