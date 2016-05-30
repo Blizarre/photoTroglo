@@ -67,8 +67,8 @@ try:
             status = "Nom de fichier non conforme ou fichier non conforme : " + nomFichier + "\n"
     else:
         status = "Pas de fichiers/Collection trouves, contient : " + " ".join([str(i) for i in form.keys()])
-except Exception, e:
-    print "Erreur '" + str(e) + "', form contient : " + " ".join([str(i) for i in form])
+except Exception as e:
+    print("Erreur '" + str(e) + "', form contient : " + " ".join([str(i) for i in form]))
     traceback.print_exc(file=sys.stdout)
 
 # cgi.log(status)

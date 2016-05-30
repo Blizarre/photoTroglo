@@ -1,23 +1,23 @@
 #!/usr/bin/env python
 # encoding:utf-8
 
-import httplib as http
-import urlparse as urlp
+import http.client as http
+import urllib.parse as urlp
 import os.path as op
 
 import logging as log
 from postUsingMIME import encode_multipart_formdata as encodeMulti
 
-import urllib as ur
-
+import urllib.request as ur
+import urllib.parse as up
 log.basicConfig(level=log.DEBUG)
 
 
 # Est utilisé pour générer la galerie APRES que les photos est été envoyées.
 def genererGalerie(url, nomCollection):
     log.debug("Lancement de 'GenererGalerie' avec l'url %s", url)
-    result = ur.urlopen(url + "?" + ur.urlencode({"collection": nomCollection}))
-    log.debug("Retour de la création de la galerie :\n" + result.read())
+    result = ur.urlopen(url + "?" + up.urlencode({"collection": nomCollection}))
+    log.debug("Retour de la création de la galerie :\n" + result.read().decode())
 
 
 class EnvoiFichiers:
@@ -47,8 +47,8 @@ class EnvoiFichiers:
 
     def _envoyerRequete(self, content_type, body):
         log.debug("Connexion au serveur %s", self.serveur)
-        connexion = http.HTTPConnection(self.serveur)
-
+        connexion = http.HTTPConnection("127.0.0.1:8888")
+        connexion.set_tunnel(self.serveur)
         connexion.putrequest('POST', self.cheminServeur)
         connexion.putheader('content-type', content_type)
         connexion.putheader('content-length', str(len(body)))
@@ -95,15 +95,14 @@ if __name__ == '__main__':
     args = sys.argv[1:]
 
     if len(args) != 3:
-        print usage
+        print(usage)
         sys.exit(0)
 
     (nomFichier, url, col) = args
 
     envF = EnvoiFichiers(url)
     reponse = envF.envoyerFichier(nomFichier, collection=col)
-    print "status:", reponse.status
-    print "message:";
-    reponse.msg
-    print "raison:", reponse.reason
-    print "data:", reponse.read()
+    print("status:", reponse.status)
+    print("message:", reponse.msg)
+    print("raison:", reponse.reason)
+    print("data:", reponse.read())

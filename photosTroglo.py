@@ -1,9 +1,9 @@
 # encoding: utf-8
 
-VERSION = "1.3"
+VERSION = "1.5"
 
-from Tkinter import *
-import tkFileDialog, tkMessageBox
+from tkinter import *
+from tkinter import filedialog, messagebox
 
 from os.path import join, split, splitext
 from os import listdir, close, unlink
@@ -46,7 +46,7 @@ class Application(Frame):
         app.nomCommentaire.set(self.liste.get(self.liste.curselection()).commentaire)
 
     def DemanderRep(self):
-        self.nomRep = tkFileDialog.askdirectory()
+        self.nomRep = filedialog.askdirectory()
 
         if self.nomRep:
             self.labelRep["text"] = self.nomRep
@@ -85,26 +85,27 @@ class Application(Frame):
                 # Envoi de ce fichier temporaire
                 reponse = connEnv.envoyerFichier(fichierTemp, nomCollection, cleanup(nomFichier))
                 log.debug("Réponse de l'upload de %s : \n%s", nomFichier, reponse)
-                if reponse[:2] != "OK": raise Exception("Erreur lors de l'envoi du fichier main " + nomFichier)
+                if reponse[:2] != b"OK": raise Exception("Erreur lors de l'envoi du fichier main " + nomFichier + " " + str(reponse))
 
                 reponse = connEnv.envoyerFichierThumb(fichierTempT, nomCollection, cleanup(nomFichier))
                 log.debug("Réponse de l'upload de %s : \n%s", nomFichier, reponse)
-                if reponse[:2] != "OK": raise Exception("Erreur lors de l'envoi du fichier thumb " + nomFichier)
+                if reponse[:2] != b"OK": raise Exception("Erreur lors de l'envoi du fichier thumb " + nomFichier)
 
                 reponse = connEnv.envoyerFichierGal(fichierTempG, nomCollection, cleanup(nomFichier))
                 log.debug("Réponse de l'upload de %s : \n%s", nomFichier, reponse)
-                if reponse[:2] != "OK": raise Exception("Erreur lors de l'envoi du fichier Gal " + nomFichier)
+                if reponse[:2] != b"OK": raise Exception("Erreur lors de l'envoi du fichier Gal " + nomFichier)
 
                 unlink(fichierTemp)  # fichier temporaire devenu inutile
                 unlink(fichierTempT)  # fichier temporaire devenu inutile
                 unlink(fichierTempG)  # fichier temporaire devenu inutile
                 self.liste.delete(0)
                 self.master.update()
-            except Exception, e:
+            except Exception as e:
+                raise e
                 nombreErreurs += 1
-                log.warn("Erreur lors de l'envoie du fichier ! : %s", str(e))
+                log.warning("Erreur lors de l'envoie du fichier ! : %s", str(e))
                 if nombreErreurs > 5:
-                    tkMessageBox.showinfo("Petit problème",
+                    messagebox.showinfo("Petit problème",
                                           "Il y a eu un problème lors de l'envoi de l'image. Plus d'explications ci-après (bon courage) :\n>>> " + str(
                                               e) + "\n")
                     return False
@@ -119,17 +120,18 @@ class Application(Frame):
             try:
                 genererGalerie(URL_CREERGALERIE, nomCollection)
                 galerieOk = True
-            except Exception, e:
+            except Exception as e:
+                raise e
                 nombreErreurs += 1
-                log.warn("Erreur lors de la création de la galerie ! : %s", str(e))
+                log.warning("Erreur lors de la création de la galerie ! : %s", str(e))
                 if nombreErreurs > 5:
-                    tkMessageBox.showinfo("Petit problème",
+                    messagebox.showinfo("Petit problème",
                                           "Il y a eu un problème lors de l'envoi de l'image. Plus d'explications ci-après (bon courage) :\n>>> " + str(
                                               e) + "\n")
                     self.quit()
 
         self.changerStatus("La galerie a été crée sur le serveur")
-        tkMessageBox.showinfo(u"Bonne nouvelle !",
+        messagebox.showinfo(u"Bonne nouvelle !",
                               u"Images disponibles à l'adresse : " + URL_BASE + nomCollection + u"\nUn navigateur va s'ouvrir à cette page")
         webbrowser.open(URL_BASE + nomCollection)
 
@@ -137,13 +139,13 @@ class Application(Frame):
         self.btEnvoiFichiers["state"] = DISABLED
 
         if self.liste.size() == 0:
-            tkMessageBox.showwarning(
+            messagebox.showwarning(
                 "Pas de fichiers",
                 "Il n'y a pas de fichiers à envoyer." +
                 "Cliquez sur le bouton 'Choisir un répertoire' " +
                 "pour sélectionner les photos à envoyer")
         elif cleanup(self.nomCollec.get()) == "":
-            tkMessageBox.showwarning(
+            messagebox.showwarning(
                 "Nom de collection invalide",
                 "Le nom de la collection est invalide. " +
                 "Si il n'est pas vide, essayez de retirer les caractères " +
