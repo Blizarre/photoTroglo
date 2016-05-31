@@ -33,7 +33,7 @@ class NomFichier:
 
 
 class Application(Frame):
-    def OnSelectListElement(self, event):
+    def OnSelectListElement(self, _):
         app.entreeCommentaire["state"] = NORMAL
         app.nomCommentaire.set(self.liste.get(self.liste.curselection()).commentaire)
 
@@ -60,7 +60,7 @@ class Application(Frame):
         while self.liste.size() > 0:
             try:
                 nomFichier = self.liste.get(0)
-                self.changerStatus(u"Envoi de %s en cours..." % (nomFichier))
+                self.changerStatus(u"Envoi de %s en cours..." % nomFichier)
                 fd, fichierTemp = tempfile.mkstemp(suffix=".jpg")
                 fdT, fichierTempT = tempfile.mkstemp(suffix=".jpg")
                 fdG, fichierTempG = tempfile.mkstemp(suffix=".jpg")
@@ -77,16 +77,24 @@ class Application(Frame):
                 # Envoi de ce fichier temporaire
                 reponse = connEnv.envoyerFichier(fichierTemp, nomCollection, cleanup(nomFichier))
                 log.debug("Réponse de l'upload de %s : \n%s", nomFichier, reponse)
-                if reponse[:2] != b"OK": raise Exception(
-                    "Erreur lors de l'envoi du fichier main " + nomFichier + " " + str(reponse))
+                if reponse[:2] != b"OK":
+                    raise Exception(
+                        "Erreur lors de l'envoi du fichier main " + nomFichier + " " + str(reponse)
+                    )
 
                 reponse = connEnv.envoyerFichierThumb(fichierTempT, nomCollection, cleanup(nomFichier))
                 log.debug("Réponse de l'upload de %s : \n%s", nomFichier, reponse)
-                if reponse[:2] != b"OK": raise Exception("Erreur lors de l'envoi du fichier thumb " + nomFichier)
+                if reponse[:2] != b"OK":
+                    raise Exception(
+                        "Erreur lors de l'envoi du fichier thumb " + nomFichier
+                    )
 
                 reponse = connEnv.envoyerFichierGal(fichierTempG, nomCollection, cleanup(nomFichier))
                 log.debug("Réponse de l'upload de %s : \n%s", nomFichier, reponse)
-                if reponse[:2] != b"OK": raise Exception("Erreur lors de l'envoi du fichier Gal " + nomFichier)
+                if reponse[:2] != b"OK":
+                    raise Exception(
+                        "Erreur lors de l'envoi du fichier Gal " + nomFichier
+                    )
 
                 unlink(fichierTemp)  # fichier temporaire devenu inutile
                 unlink(fichierTempT)  # fichier temporaire devenu inutile
@@ -94,7 +102,6 @@ class Application(Frame):
                 self.liste.delete(0)
                 self.master.update()
             except Exception as e:
-                raise e
                 nombreErreurs += 1
                 log.warning("Erreur lors de l'envoie du fichier ! : %s", str(e))
                 if nombreErreurs > 5:
@@ -114,7 +121,6 @@ class Application(Frame):
                 genererGalerie(parameters.URL_CREERGALERIE, nomCollection)
                 galerieOk = True
             except Exception as e:
-                raise e
                 nombreErreurs += 1
                 log.warning("Erreur lors de la création de la galerie ! : %s", str(e))
                 if nombreErreurs > 5:
@@ -151,12 +157,12 @@ class Application(Frame):
         self.btEnvoiFichiers["state"] = NORMAL
 
     def createWidgets(self):
-        ### Frame des boutons placé à gauche
+        # Frame des boutons placé à gauche
 
         self.frameBoutons = Frame(self, pad=10)
         self.frameBoutons.pack({"side": "left"}, fill=Y, expand=NO)
 
-        ### Commentaire (en bas)
+        # Commentaire (en bas)
 
         self.nomCommentaire = StringVar(self)
         self.nomCommentaire.set("<Commentaire de l'image (Optionnel)>")
@@ -164,20 +170,20 @@ class Application(Frame):
         self.entreeCommentaire.pack({"side": "bottom"}, fill=X)
         self.entreeCommentaire["state"] = DISABLED
 
-        ### Label indiquant le répertoire (Haut)
+        # Label indiquant le répertoire (Haut)
 
         self.labelRep = Label(self)
         self.labelRep["text"] = u"<Pas de répertoire sélectionné>"
         self.labelRep.pack({"side": "top"})
 
-        ### Liste des fichiers (Centre)
+        # Liste des fichiers (Centre)
 
         self.liste = Listbox(self)
         self.liste.pack({"side": "top"}, fill=BOTH, expand=YES)
         self.liste.bind('<Double-1>', self.OnSelectListElement)
         # wx.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnSelectListElement, self.liste)
 
-        ### Boutons
+        # Boutons
 
         self.choixRep = Button(self.frameBoutons)
         self.choixRep["text"] = "1) Choisir un repertoire"

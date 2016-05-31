@@ -27,7 +27,8 @@ class EnvoiFichiers:
         self.serveur = data_url.netloc
         self.cheminServeur = data_url.path
 
-    def _preparerRequete(self, cheminFichier, collection, nomFichier, typeFich):
+    @staticmethod
+    def _preparerRequete(cheminFichier, collection, nomFichier, typeFich):
         log.debug("Preparation de la requete: %s, %s, %s, type:%s", cheminFichier, collection, nomFichier, typeFich)
         if not nomFichier:
             nomFichier = op.split(cheminFichier)[-1]
@@ -43,7 +44,7 @@ class EnvoiFichiers:
         header = {"collection": collection, "nomFichier": nomFichier, "typeImage": typeFich}
         content_type, body = encodeMulti(header, [["imageEnvoyee", nomFichier, dataFichier]])
 
-        return (content_type, body)
+        return content_type, body
 
     def _envoyerRequete(self, content_type, body):
         log.debug("Connexion au serveur %s", self.serveur)
