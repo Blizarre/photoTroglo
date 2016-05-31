@@ -47,8 +47,7 @@ class EnvoiFichiers:
 
     def _envoyerRequete(self, content_type, body):
         log.debug("Connexion au serveur %s", self.serveur)
-        connexion = http.HTTPConnection("127.0.0.1:8888")
-        connexion.set_tunnel(self.serveur)
+        connexion = http.HTTPConnection(self.serveur)
         connexion.putrequest('POST', self.cheminServeur)
         connexion.putheader('content-type', content_type)
         connexion.putheader('content-length', str(len(body)))
