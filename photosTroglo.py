@@ -7,11 +7,10 @@ import webbrowser
 from os import listdir, close, unlink
 from os.path import join, split, splitext
 from tkinter import *
-from tkinter.ttk import *
 from tkinter import filedialog, messagebox
+from tkinter.ttk import *
 
 import parameters
-
 import traiterImage as tm
 from envoiFichier import EnvoiFichiers
 from envoiFichier import genererGalerie
@@ -22,8 +21,6 @@ log.basicConfig(level=log.DEBUG)
 def cleanup(nom):
     nvNom = re.sub("[^\._\-a-zA-Z0-9]", '', nom)
     return nvNom
-
-
 
 
 class NomFichier:

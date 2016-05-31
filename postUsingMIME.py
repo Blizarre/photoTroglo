@@ -14,13 +14,13 @@ def encode_multipart_formdata(fields, files):
     L = []
     for (key, value) in fields.items():
         L.append(b'--' + BOUNDARY)
-        L.append( ('Content-Disposition: form-data; name="%s"' % str(key)).encode() )
+        L.append(('Content-Disposition: form-data; name="%s"' % str(key)).encode())
         L.append(b'')
-        L.append(value.encode() )
+        L.append(value.encode())
     for (key, filename, value) in files:
         L.append(b'--' + BOUNDARY)
-        L.append( ('Content-Disposition: form-data; name="%s"; filename="%s"' % (str(key), str(filename))).encode() )
-        L.append( ('Content-Type: %s' % get_content_type(str(filename))).encode() )
+        L.append(('Content-Disposition: form-data; name="%s"; filename="%s"' % (str(key), str(filename))).encode())
+        L.append(('Content-Type: %s' % get_content_type(str(filename))).encode())
         L.append(b'')
         L.append(value)
     L.append(b'--' + BOUNDARY + b'--')

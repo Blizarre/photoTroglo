@@ -2,14 +2,14 @@
 # encoding:utf-8
 
 import http.client as http
-import urllib.parse as urlp
-import os.path as op
-
 import logging as log
+import os.path as op
+import urllib.parse as urlp
+import urllib.parse as up
+import urllib.request as ur
+
 from postUsingMIME import encode_multipart_formdata as encodeMulti
 
-import urllib.request as ur
-import urllib.parse as up
 log.basicConfig(level=log.DEBUG)
 
 
