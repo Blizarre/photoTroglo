@@ -1,6 +1,5 @@
 # encoding: utf-8
 
-VERSION = "1.5"
 
 import logging as log
 import tempfile
@@ -10,6 +9,8 @@ from os.path import join, split, splitext
 from tkinter import *
 from tkinter.ttk import *
 from tkinter import filedialog, messagebox
+
+import parameters
 
 import traiterImage as tm
 from envoiFichier import EnvoiFichiers
@@ -23,9 +24,6 @@ def cleanup(nom):
     return nvNom
 
 
-URL_BASE = "http://photo.troglos.fr/"
-URL_UPLOAD = URL_BASE + "upload.cgi"
-URL_CREERGALERIE = URL_BASE + "galerie.cgi"
 
 
 class NomFichier:
@@ -61,7 +59,7 @@ class Application(Frame):
     def _contacterUpload(self):
         nombreErreurs = 0
         nomCollection = cleanup(self.nomCollec.get())
-        connEnv = EnvoiFichiers(URL_UPLOAD)
+        connEnv = EnvoiFichiers(parameters.URL_UPLOAD)
         while self.liste.size() > 0:
             try:
                 nomFichier = self.liste.get(0)
@@ -116,7 +114,7 @@ class Application(Frame):
         nombreErreurs = 0
         while not galerieOk:
             try:
-                genererGalerie(URL_CREERGALERIE, nomCollection)
+                genererGalerie(parameters.URL_CREERGALERIE, nomCollection)
                 galerieOk = True
             except Exception as e:
                 raise e
@@ -130,8 +128,8 @@ class Application(Frame):
 
         self.changerStatus("La galerie a été crée sur le serveur")
         messagebox.showinfo(u"Bonne nouvelle !",
-                            u"Images disponibles à l'adresse : " + URL_BASE + nomCollection + u"\nUn navigateur va s'ouvrir à cette page")
-        webbrowser.open(URL_BASE + nomCollection)
+                            u"Images disponibles à l'adresse : " + parameters.URL_BASE + nomCollection + u"\nUn navigateur va s'ouvrir à cette page")
+        webbrowser.open(parameters.URL_BASE + nomCollection)
 
     def envoyerFichiers(self):
         self.btEnvoiFichiers["state"] = DISABLED
@@ -225,7 +223,7 @@ class Application(Frame):
 
 root = Tk()
 root.geometry("650x400")
-root.title("Envoi de photos v" + VERSION)
+root.title("Envoi de photos v" + parameters.VERSION)
 app = Application(master=root)
 app.mainloop()
 root.destroy()
