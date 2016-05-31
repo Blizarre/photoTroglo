@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # encoding: utf-8
 
-import cgitb;
+import cgitb
 
 cgitb.enable()
 
@@ -34,10 +34,12 @@ def cleanup(nom):
     return re.sub("[^\.\-_a-zA-Z0-9]", '', nom)
 
 
+form = []
+status = "Demarrage\n"
+
 try:
     form = cgi.FieldStorage()
 
-    status = "Demarrage\n"
     if "collection" in form and "nomFichier" in form:
         struct_fichier = form["imageEnvoyee"]
 
