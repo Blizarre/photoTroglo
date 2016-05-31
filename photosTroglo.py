@@ -1,22 +1,19 @@
 # encoding: utf-8
 
-VERSION = "1.3"
-
-from Tkinter import *
-import tkFileDialog, tkMessageBox
-
-from os.path import join, split, splitext
-from os import listdir, close, unlink
-import re
-import traiterImage as tm
-
-from envoiFichier import EnvoiFichiers
-from envoiFichier import genererGalerie
-import tempfile
-
-import webbrowser
 
 import logging as log
+import tempfile
+import webbrowser
+from os import listdir, close, unlink
+from os.path import join, split, splitext
+from tkinter import *
+from tkinter import filedialog, messagebox
+from tkinter.ttk import *
+
+import parameters
+import traiterImage as tm
+from envoiFichier import EnvoiFichiers
+from envoiFichier import genererGalerie
 
 log.basicConfig(level=log.DEBUG)
 
@@ -24,11 +21,6 @@ log.basicConfig(level=log.DEBUG)
 def cleanup(nom):
     nvNom = re.sub("[^\._\-a-zA-Z0-9]", '', nom)
     return nvNom
-
-
-URL_BASE = "http://photo.troglos.fr/"
-URL_UPLOAD = URL_BASE + "upload.cgi"
-URL_CREERGALERIE = URL_BASE + "galerie.cgi"
 
 
 class NomFichier:
@@ -41,12 +33,12 @@ class NomFichier:
 
 
 class Application(Frame):
-    def OnSelectListElement(self, event):
+    def OnSelectListElement(self, _):
         app.entreeCommentaire["state"] = NORMAL
         app.nomCommentaire.set(self.liste.get(self.liste.curselection()).commentaire)
 
     def DemanderRep(self):
-        self.nomRep = tkFileDialog.askdirectory()
+        self.nomRep = filedialog.askdirectory()
 
         if self.nomRep:
             self.labelRep["text"] = self.nomRep
@@ -64,11 +56,11 @@ class Application(Frame):
     def _contacterUpload(self):
         nombreErreurs = 0
         nomCollection = cleanup(self.nomCollec.get())
-        connEnv = EnvoiFichiers(URL_UPLOAD)
+        connEnv = EnvoiFichiers(parameters.URL_UPLOAD)
         while self.liste.size() > 0:
             try:
                 nomFichier = self.liste.get(0)
-                self.changerStatus(u"Envoi de %s en cours..." % (nomFichier))
+                self.changerStatus(u"Envoi de %s en cours..." % nomFichier)
                 fd, fichierTemp = tempfile.mkstemp(suffix=".jpg")
                 fdT, fichierTempT = tempfile.mkstemp(suffix=".jpg")
                 fdG, fichierTempG = tempfile.mkstemp(suffix=".jpg")
@@ -85,28 +77,37 @@ class Application(Frame):
                 # Envoi de ce fichier temporaire
                 reponse = connEnv.envoyerFichier(fichierTemp, nomCollection, cleanup(nomFichier))
                 log.debug("Réponse de l'upload de %s : \n%s", nomFichier, reponse)
-                if reponse[:2] != "OK": raise Exception("Erreur lors de l'envoi du fichier main " + nomFichier)
+                if reponse[:2] != b"OK":
+                    raise Exception(
+                        "Erreur lors de l'envoi du fichier main " + nomFichier + " " + str(reponse)
+                    )
 
                 reponse = connEnv.envoyerFichierThumb(fichierTempT, nomCollection, cleanup(nomFichier))
                 log.debug("Réponse de l'upload de %s : \n%s", nomFichier, reponse)
-                if reponse[:2] != "OK": raise Exception("Erreur lors de l'envoi du fichier thumb " + nomFichier)
+                if reponse[:2] != b"OK":
+                    raise Exception(
+                        "Erreur lors de l'envoi du fichier thumb " + nomFichier
+                    )
 
                 reponse = connEnv.envoyerFichierGal(fichierTempG, nomCollection, cleanup(nomFichier))
                 log.debug("Réponse de l'upload de %s : \n%s", nomFichier, reponse)
-                if reponse[:2] != "OK": raise Exception("Erreur lors de l'envoi du fichier Gal " + nomFichier)
+                if reponse[:2] != b"OK":
+                    raise Exception(
+                        "Erreur lors de l'envoi du fichier Gal " + nomFichier
+                    )
 
                 unlink(fichierTemp)  # fichier temporaire devenu inutile
                 unlink(fichierTempT)  # fichier temporaire devenu inutile
                 unlink(fichierTempG)  # fichier temporaire devenu inutile
                 self.liste.delete(0)
                 self.master.update()
-            except Exception, e:
+            except Exception as e:
                 nombreErreurs += 1
-                log.warn("Erreur lors de l'envoie du fichier ! : %s", str(e))
+                log.warning("Erreur lors de l'envoie du fichier ! : %s", str(e))
                 if nombreErreurs > 5:
-                    tkMessageBox.showinfo("Petit problème",
-                                          "Il y a eu un problème lors de l'envoi de l'image. Plus d'explications ci-après (bon courage) :\n>>> " + str(
-                                              e) + "\n")
+                    messagebox.showinfo("Petit problème",
+                                        "Il y a eu un problème lors de l'envoi de l'image. Plus d'explications ci-après (bon courage) :\n>>> " + str(
+                                            e) + "\n")
                     return False
         self.changerStatus(u"Envoi des fichiers terminé")
         return True
@@ -117,33 +118,33 @@ class Application(Frame):
         nombreErreurs = 0
         while not galerieOk:
             try:
-                genererGalerie(URL_CREERGALERIE, nomCollection)
+                genererGalerie(parameters.URL_CREERGALERIE, nomCollection)
                 galerieOk = True
-            except Exception, e:
+            except Exception as e:
                 nombreErreurs += 1
-                log.warn("Erreur lors de la création de la galerie ! : %s", str(e))
+                log.warning("Erreur lors de la création de la galerie ! : %s", str(e))
                 if nombreErreurs > 5:
-                    tkMessageBox.showinfo("Petit problème",
-                                          "Il y a eu un problème lors de l'envoi de l'image. Plus d'explications ci-après (bon courage) :\n>>> " + str(
-                                              e) + "\n")
+                    messagebox.showinfo("Petit problème",
+                                        "Il y a eu un problème lors de l'envoi de l'image. Plus d'explications ci-après (bon courage) :\n>>> " + str(
+                                            e) + "\n")
                     self.quit()
 
         self.changerStatus("La galerie a été crée sur le serveur")
-        tkMessageBox.showinfo(u"Bonne nouvelle !",
-                              u"Images disponibles à l'adresse : " + URL_BASE + nomCollection + u"\nUn navigateur va s'ouvrir à cette page")
-        webbrowser.open(URL_BASE + nomCollection)
+        messagebox.showinfo(u"Bonne nouvelle !",
+                            u"Images disponibles à l'adresse : " + parameters.URL_BASE + nomCollection + u"\nUn navigateur va s'ouvrir à cette page")
+        webbrowser.open(parameters.URL_BASE + nomCollection)
 
     def envoyerFichiers(self):
         self.btEnvoiFichiers["state"] = DISABLED
 
         if self.liste.size() == 0:
-            tkMessageBox.showwarning(
+            messagebox.showwarning(
                 "Pas de fichiers",
                 "Il n'y a pas de fichiers à envoyer." +
                 "Cliquez sur le bouton 'Choisir un répertoire' " +
                 "pour sélectionner les photos à envoyer")
         elif cleanup(self.nomCollec.get()) == "":
-            tkMessageBox.showwarning(
+            messagebox.showwarning(
                 "Nom de collection invalide",
                 "Le nom de la collection est invalide. " +
                 "Si il n'est pas vide, essayez de retirer les caractères " +
@@ -156,12 +157,12 @@ class Application(Frame):
         self.btEnvoiFichiers["state"] = NORMAL
 
     def createWidgets(self):
-        ### Frame des boutons placé à gauche
+        # Frame des boutons placé à gauche
 
-        self.frameBoutons = Frame(self)
+        self.frameBoutons = Frame(self, pad=10)
         self.frameBoutons.pack({"side": "left"}, fill=Y, expand=NO)
 
-        ### Commentaire (en bas)
+        # Commentaire (en bas)
 
         self.nomCommentaire = StringVar(self)
         self.nomCommentaire.set("<Commentaire de l'image (Optionnel)>")
@@ -169,20 +170,20 @@ class Application(Frame):
         self.entreeCommentaire.pack({"side": "bottom"}, fill=X)
         self.entreeCommentaire["state"] = DISABLED
 
-        ### Label indiquant le répertoire (Haut)
+        # Label indiquant le répertoire (Haut)
 
         self.labelRep = Label(self)
         self.labelRep["text"] = u"<Pas de répertoire sélectionné>"
         self.labelRep.pack({"side": "top"})
 
-        ### Liste des fichiers (Centre)
+        # Liste des fichiers (Centre)
 
         self.liste = Listbox(self)
         self.liste.pack({"side": "top"}, fill=BOTH, expand=YES)
         self.liste.bind('<Double-1>', self.OnSelectListElement)
         # wx.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnSelectListElement, self.liste)
 
-        ### Boutons
+        # Boutons
 
         self.choixRep = Button(self.frameBoutons)
         self.choixRep["text"] = "1) Choisir un repertoire"
@@ -218,14 +219,14 @@ class Application(Frame):
         self.QUIT.pack({"side": "top"})
 
     def __init__(self, master=None):
-        Frame.__init__(self, master)
+        Frame.__init__(self, master, pad=5)
         self.pack(fill=BOTH, expand=YES)
         self.createWidgets()
 
 
 root = Tk()
-root.geometry("650x384")
-root.title("Envoi de photos v" + VERSION)
+root.geometry("650x400")
+root.title("Envoi de photos v" + parameters.VERSION)
 app = Application(master=root)
 app.mainloop()
 root.destroy()

@@ -1,8 +1,8 @@
 # encoding: utf-8
 
-import Image
-
 import logging as log
+
+from PIL import Image
 
 # Liste des qualité d'images
 d_qualite = {

@@ -159,7 +159,7 @@ try:
         status += "Terminé"
     else:
         status += "Pas d'arguments trouvée"
-except Exception, e:
+except Exception as e:
     status += "Erreur :" + str(e)
 
-print "Content-type: text/html; charset=utf-8\n\n" + status
+print("Content-type: text/html; charset=utf-8\n\n" + status)
